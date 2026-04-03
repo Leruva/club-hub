@@ -4,6 +4,10 @@ require('dotenv').config();
 const PORT = process.env.PORT || 5001;
 const app = express();
 connectDB();
+
+app.use(express.json());
+
+app.use('/api/auth', require('./modules/auth/auth_router'));
 app.get('/', (req,res)=>{
     res.json('Hello from club-hub api');
 });

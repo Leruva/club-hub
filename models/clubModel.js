@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const clubSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  presidentName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
   description: String,
