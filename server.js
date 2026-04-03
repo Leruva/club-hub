@@ -9,6 +9,7 @@ app.use(express.json());
 
 app.use('/api/auth', require('./modules/auth/auth_router'));
 app.use('/api/admin', require('./modules/admin/admin_routes'));
+app.use('/api/events', require('./modules/events/event_routes'));
 app.get('/', (req,res)=>{
     res.json('Hello from club-hub api');
 });
