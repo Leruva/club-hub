@@ -13,16 +13,6 @@ const createEvent = async (req,res) =>{
     }
 }
 
-const updateEvent = async (req,res) =>{
-    try{
-        const event = await Event.findOneByIdAndpdate(req.params.id, ...req.body , {new: true});
-        if(!event)  res.status(404).json({message: 'Event not found'});
-        res.status(200).json('Updated')
-    }catch(err){
-        res.status(500).json({message: err.message});
-    }
-}
-
 const getAllEvents = async (req, res) =>{
     try{
         const events = await Event.find();
@@ -31,18 +21,6 @@ const getAllEvents = async (req, res) =>{
         res.status(500).json({message: err.message}); 
     }
 }
-
-const getEventById = async (req,res) =>{
-    try{
-        const event = await Event.findById(req.params.id);
-        if(!event) return res.status(404).json({message: 'Event not found'});
-        res.status(200).json(event);
-    }catch(err){
-        res.status(500).json({message: err.message});
-    }
-}
-
-
 
 const registerForEvent = async (req, res) => {
   try {
@@ -84,11 +62,41 @@ const getRegistrations = async (req, res) => {
   res.json(list);
 };
 
+const getSingleEvent = async (req,res) =>{
+    try{
+        const event = await Event.findById(req.params.id);
+        if(!event) return res.status(404).json({message: 'Event not found'});
+        res.status(200).json(event);
+    }catch(err){
+        res.status(500).json({message: err.message});
+    }
+}
+
+const updateEvent = async (req,res) =>{
+    try{
+        const event = await Event.findOneByIdAndpdate(req.params.id, ...req.body , {new: true});
+        if(!event)  res.status(404).json({message: 'Event not found'});
+        res.status(200).json('Updated')
+    }catch(err){
+        res.status(500).json({message: err.message});
+    }
+}
+
+const deleteEvent = async (req, res) => {
+  try {
+    await Event.findByIdAndUpdate(req.params.id, { status: 'cancelled' });
+    res.json({ message: 'Event cancelled successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
     createEvent,
-    updateEvent,   
+    updateEvent,
+    deleteEvent,
     getAllEvents,
-    getEventById,
+    getSingleEvent,
     registerForEvent,
     getRegistrations,
 }
