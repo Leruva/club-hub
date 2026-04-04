@@ -1,5 +1,5 @@
 const Event  = require('../models/eventModel');
-
+const Announcement = require('../models/announcementModel');
 const requireClubOwnership = async (req, res, next) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -18,4 +18,21 @@ const requireClubOwnership = async (req, res, next) => {
   }
 };
 
-module.exports = { requireClubOwnership };
+const requireAnnouncementOwnership = async (req, res, next) => {
+  try {
+    const announcement = await Announcement.findById(req.params.id);
+    if (!announcement) {
+      return res.status(404).json({ message: 'Announcement not found' });
+    }
+    if (announcement.clubId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'You can only access your own announcements' });
+    }
+    req.announcement = announcement;
+    next();
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+module.exports = { requireClubOwnership, requireAnnouncementOwnership };
