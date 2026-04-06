@@ -1,6 +1,6 @@
 const Hiring = require('../../models/hiringModel');
 
-constcreateHiring = async (req, res) => {
+const createHiring = async (req, res) => {
   try {
     const hiring = await Hiring.create({
       ...req.body,

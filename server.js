@@ -11,6 +11,9 @@ app.use('/api/auth', require('./modules/auth/auth_router'));
 app.use('/api/admin', require('./modules/admin/admin_routes'));
 app.use('/api/events', require('./modules/events/event_routes'));
 app.use('/api/announcements', require('./modules/announcements/announcements_routes'));
+app.use('/api/hirings', require('./modules/hirings/hirings_routes'));
+app.use('/api/clubs', require('./modules/clubs/club_routes'));
+app.use('/api/students', require('./modules/student/student_routes'));
 app.get('/', (req,res)=>{
     res.json('Hello from club-hub api');
 });

@@ -1,6 +1,6 @@
 const express = require('express');
-const controller = require('./hiring.controller');
-const { verifyToken, requireRole } = require('../../middlewares/auth.middleware');
+const controller = require('./hirings_controller');
+const { verifyToken, requireRole } = require('../../middleware/auth_middleware');
 
 const router = express.Router();
 
