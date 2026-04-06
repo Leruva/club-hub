@@ -1,14 +1,8 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const User = require('../../models/userModel');
 const Club = require('../../models/clubModel');
-const { eventNames } = require('../../models/userModel');
+const bcrypt = require('bcrypt');
+const { generateToken } = require('../../utils/jwt');
 
-const generateToken = (payload)=>{
-    return jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: '60m',
-    });
-}
 
 const registerStudent = async (data) =>{
     const existing = await User.findOne({email: data.email});
