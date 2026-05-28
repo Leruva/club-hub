@@ -1,15 +1,21 @@
 const mongoose = require('mongoose');
 
 const announcementSchema = new mongoose.Schema({
-  clubId: { type: mongoose.Schema.Types.ObjectId, ref: 'Club', required: true },
-  title: { type: String, required: true },
-  body: { type: String, required: true },
-  targetAudience: {
-    type: String,
-    enum: ['all', 'registered'],
-    default: 'all',
-  },
-  eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event' },
+
+   club: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Club"
+   },
+
+   title: String,
+
+   content: String,
+
+   postedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+   }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Announcement', announcementSchema);
