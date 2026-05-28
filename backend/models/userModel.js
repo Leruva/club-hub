@@ -1,16 +1,42 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  passwordHash: { type: String, required: true },
-  role: {
-    type: String,
-    enum: ['student', 'admin'],
-    default: 'student',
-  },
-  collegeId: String,
-  isVerified: { type: Boolean, default: false },
+
+   fullName: {
+      type: String,
+      required: true
+   },
+
+   email: {
+      type: String,
+      unique: true,
+      required: true
+   },
+
+   password: {
+      type: String,
+      required: true
+   },
+
+   profileImage: String,
+
+   year: String,
+
+   course: String,
+
+   interests: [String],
+
+   globalRole: {
+      type: String,
+      enum: ["student", "superAdmin"],
+      default: "student"
+   },
+
+   isVerified: {
+      type: Boolean,
+      default: false
+   }
+
 }, { timestamps: true });
 
 
