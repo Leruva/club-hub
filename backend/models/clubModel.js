@@ -30,10 +30,6 @@ const clubSchema = new mongoose.Schema({
       required: true
    },
 
-   phoneNumber: {
-      type: String
-   },
-
    socialLinks: {
       instagram: String,
       linkedin: String,
@@ -69,6 +65,7 @@ const clubSchema = new mongoose.Schema({
       default: true
    }
 
-}, { timestamps: true });
+}, { timestamps: true })
+
 
 module.exports = mongoose.model('Club', clubSchema);
