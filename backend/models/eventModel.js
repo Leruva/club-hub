@@ -1,22 +1,54 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
-  clubId: { type: mongoose.Schema.Types.ObjectId, ref: 'Club', required: true },
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  category: { type: String, required: true },
-  bannerUrl: { type: String, required: true },
-  venue: { type: String, required: true },
-  startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
-  registrationDeadline: { type: Date, required: true },
-  maxParticipants: Number,
-  registrationCount: { type: Number, default: 0 },
-  status: {
-    type: String,
-    enum: ['draft', 'published', 'cancelled'],
-    default: 'published',
-  },
+
+   title: {
+      type: String,
+      required: true
+   },
+
+   description: String,
+
+   bannerImage: String,
+
+   club: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Club"
+   },
+
+   createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+   },
+
+   category: String,
+
+   venue: String,
+
+   startDate: Date,
+
+   endDate: Date,
+
+   registrationDeadline: Date,
+
+   maxParticipants: Number,
+
+   tags: [String],
+
+   status: {
+      type: String,
+      enum: [
+         "draft",
+         "pendingApproval",
+         "approved",
+         "rejected",
+         "completed"
+      ],
+      default: "pendingApproval"
+   },
+
+   qrCode: String
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Event', eventSchema);
