@@ -49,7 +49,6 @@ const loginStudent = async ({ email, password }) => {
     return generateToken({
         id: user._id,
         role: user.globalRole,
-        type: 'user'
     });
 };
 
@@ -140,7 +139,6 @@ const loginClub = async ({ email, password }) => {
         id: user._id,
         role: membership.role,
         clubId: membership.club._id,
-        type: 'club'
     });
 };
 
