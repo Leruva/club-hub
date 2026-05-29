@@ -20,7 +20,7 @@ const studentLogin = async (req, res) => {
 
 const clubRegister = async (req, res) => {
   try {
-    const result = await registerClub(req.body);
+    const result = await registerClub(req.body, req.user.id);
     res.status(201).json(result);
   } catch (err) {
     res.status(400).json({ message: err.message });

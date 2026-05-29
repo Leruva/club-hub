@@ -126,6 +126,16 @@ const loginClub = async ({ email, password }) => {
         throw new Error('Club request rejected');
     }
 
+    const allowedRoles = [
+        "president",
+        "vicePresident",
+        "coordinator"
+    ];  
+
+    if(!allowedRoles.includes(membership.role)){
+        throw new Error('Not authorized for club login');
+    }
+
     return generateToken({
         id: user._id,
         role: membership.role,
