@@ -5,7 +5,8 @@ const createEvent = async (req,res) =>{
     try{
         const event = await Event.create({
             ...req.body,
-            clubId: req.user.id,
+            clubId: req.user.clubId,
+            createdBy: req.user.id
         });
         res.status(201).json(event);
     }catch(err){
@@ -30,15 +31,30 @@ const registerForEvent = async (req, res) => {
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    if (event.status !== 'published') {
+    if (event.status !== 'approved') {
       return res.status(400).json({ message: 'Event is not open for registration' });
     }
+    const existingRegistration =
+      await Registration.findOne({
+          eventId: req.params.id,
+          studentId: req.user.id
+      });
 
-    if (new Date() > event.registrationDeadline) {
-      return res.status(400).json({ message: 'Registration deadline has passed' });
+    if(existingRegistration){
+      return res.status(400).json({
+          message: 'Already registered'
+      });
+    }
+    if (new Date() > event.registrationDeadline || event.status == 'completed') {
+      return res.status(400).json({ message: 'Registration deadline has passed or Event is completed' });
     }
 
-    if (event.maxParticipants && event.registrationCount >= event.maxParticipants) {
+    const registrationCount = await Registration.countDocuments({
+        eventId: req.params.id
+    });
+
+
+    if (event.maxParticipants && registrationCount >= event.maxParticipants) {
       return res.status(400).json({ message: 'Event is full' });
     }
 
@@ -46,11 +62,6 @@ const registerForEvent = async (req, res) => {
       eventId: req.params.id,
       studentId: req.user.id,
     });
-
-    await Event.findByIdAndUpdate(req.params.id, {
-      $inc: { registrationCount: 1 },
-    });
-
     res.status(201).json(registration);
   } catch (err) {
     res.status(400).json({ message: 'Already registered or invalid request' });
@@ -58,7 +69,7 @@ const registerForEvent = async (req, res) => {
 };
 
 const getRegistrations = async (req, res) => {
-  const list = await Registration.find({ eventId: req.params.id }).populate('studentId', 'name email');
+  const list = await Registration.find({ eventId: req.params.id }).populate('studentId', 'fullName email');
   res.json(list);
 };
 
@@ -74,9 +85,11 @@ const getSingleEvent = async (req,res) =>{
 
 const updateEvent = async (req,res) =>{
     try{
-        const event = await Event.findOneByIdAndpdate(req.params.id, ...req.body , {new: true});
-        if(!event)  res.status(404).json({message: 'Event not found'});
-        res.status(200).json('Updated')
+        const event = await Event.findByIdAndUpdate(req.params.id, req.body , {new: true});
+        if(!event) {
+          return res.status(404).json({message: 'Event not found'});
+        }
+        res.status(200).json(event)
     }catch(err){
         res.status(500).json({message: err.message});
     }

@@ -1,53 +1,53 @@
 const mongoose = require('mongoose');
-
 const eventSchema = new mongoose.Schema({
 
-   title: {
-      type: String,
-      required: true
-   },
+  title: {
+    type: String,
+    required: true
+  },
 
-   description: String,
+  description: String,
 
-   bannerImage: String,
+  bannerImage: String,
 
-   club: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Club"
-   },
+  club: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Club"
+  },
 
-   createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-   },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  },
 
-   category: String,
+  category: String,
 
-   venue: String,
+  venue: String,
 
-   startDate: Date,
+  startDate: Date,
 
-   endDate: Date,
+  endDate: Date,
 
-   registrationDeadline: Date,
+  registrationDeadline: Date,
 
-   maxParticipants: Number,
+  maxParticipants: Number,
 
-   tags: [String],
+  tags: [String],
 
-   status: {
-      type: String,
-      enum: [
-         "draft",
-         "pendingApproval",
-         "approved",
-         "rejected",
-         "completed"
-      ],
-      default: "pendingApproval"
-   },
+  status: {
+    type: String,
+    enum: [
+      "draft",
+      "pendingApproval",
+      "approved",
+      "rejected",
+      "completed",
+      "cancelled"
+    ],
+    default: "pendingApproval"
+  },
 
-   qrCode: String
+  qrCode: String
 
 }, { timestamps: true });
 
