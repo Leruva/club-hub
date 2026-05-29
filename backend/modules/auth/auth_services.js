@@ -1,5 +1,7 @@
 const User = require('../../models/userModel');
 const Club = require('../../models/clubModel');
+const ClubMember = require('../../models/clubMemberModel');
+
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../../utils/jwt');
 
@@ -8,67 +10,134 @@ const registerStudent = async (data) =>{
     const existing = await User.findOne({email: data.email});
     if (existing) throw new Error('Email already registered');
 
-    const passwordHash = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    const user = User.create({
-        name : data.name,
-        email : data.email,
-        passwordHash,
-        collegeId: data.collegeId,
-        role: 'student',
-        isVerified: true,
+    const user = await User.create({
+        fullName: data.fullName,
+        email: data.email,
+        password: hashedPassword,
+        year: data.year,
+        course: data.course,
+        globalRole: 'student',
+        isVerified: true
     });
-    return generateToken({ id: user._id, role: user.role, type: 'user' });    
-}
 
-const loginStudent = async ({email, password}) => {
-    const user = await User.findOne({email});
-    if(!user) throw new Error('Users is not registered');
-
-    const ok = await bcrypt.compare(password, user.passwordHash);
-    if(!ok) throw new Error('Invalid Credentials');
-
-    return generateToken({id: user._id, role: user.role, type: 'user'});
+    return generateToken({
+        id: user._id,
+        role: user.globalRole,
+        type: 'user'
+    });
 };
 
-const registerClub = async (data) => {
-    const existing = await Club.findOne({email: data.email});
-    if(existing) throw new Error('Invalid credentials');
+const loginStudent = async ({ email, password }) => {
 
-    const passwordHash = await bcrypt.hash(data.password, 10);
+    const user = await User.findOne({ email });
 
-    const club = await Club.create({
-        name : data.name,
-        email : data.email,
-        passwordHash,
-        presidentName : data.presidentName,
-        description: data.description,
+    if(!user){
+        throw new Error('User not found');
+    }
+
+    const ok = await bcrypt.compare(
+        password,
+        user.password
+    );
+
+    if(!ok){
+        throw new Error('Invalid credentials');
+    }
+
+    return generateToken({
+        id: user._id,
+        role: user.globalRole,
+        type: 'user'
+    });
+};
+
+const registerClub = async (data, userId) => {
+
+    const existing = await Club.findOne({
+        officialEmail: data.officialEmail
     });
 
-    return { message: 'Club registration submitted for admin approval' };
-}
-
-const loginClub = async ({email, password}) => {
-    const club = await Club.findOne({ email });
-    if(!club) throw new Error ('Club not found');
-
-    if(club.status == 'pending'){
-        throw new Error ('Club not approved yet');
+    if(existing){
+        throw new Error('Club email already exists');
     }
-    if(club.status == 'rejected'){
-        throw new Error ('Club not approved');
-    }
-    
-    const ok = await bcrypt.compare(password, club.passwordHash);
-    if(!ok) throw new Error ('Invalid credentials');
 
-    return generateToken({id: club._id, role: 'club', type : 'club'});
-    
-} 
+    const club = await Club.create({
+
+        clubName: data.clubName,
+
+        description: data.description,
+
+        category: data.category,
+
+        officialEmail: data.officialEmail,
+
+        logo: data.logo,
+
+        createdBy: userId,
+
+        approval: {
+            status: 'pending'
+        }
+
+    });
+
+    return {
+        message: 'Club request submitted for approval',
+        club
+    };
+};
+
+const loginClub = async ({ email, password }) => {
+
+    const user = await User.findOne({ email });
+
+    if(!user){
+        throw new Error('User not found');
+    }
+
+    const ok = await bcrypt.compare(
+        password,
+        user.password
+    );
+
+    if(!ok){
+        throw new Error('Invalid credentials');
+    }
+
+    const membership = await ClubMember.findOne({
+        user: user._id
+    }).populate('club');
+
+    if(!membership){
+        throw new Error('No club access found');
+    }
+
+    if(
+        membership.club.approval.status === 'pending'
+    ){
+        throw new Error('Club not approved yet');
+    }
+
+    if(
+        membership.club.approval.status === 'rejected'
+    ){
+        throw new Error('Club request rejected');
+    }
+
+    return generateToken({
+        id: user._id,
+        role: membership.role,
+        clubId: membership.club._id,
+        type: 'club'
+    });
+};
+
 
 module.exports = {
     registerStudent,
-    registerClub,
     loginStudent,
-    loginClub,
-}
+    registerClub,
+    loginClub
+};
