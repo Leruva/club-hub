@@ -1,70 +1,68 @@
-const Club = require('../../models/clubModel');
+const service = require('./admin_services');
 
-const pendingClubRequest = async (req,res) =>{
-    try{    
-        const clubs = await Club.findOne({status: "pending"}).select('-passwordHash');
-        res.status(200).json(clubs);
-    }catch(error){
-        return res.status(500).json({message : error.message});
-    }  
-}
-
-const approveClubRequest = async (req, res) => {
-    try{
-        const club = await Club.findByIdAndUpdate(
-            req.params.id, {status: "approved"}, {new: true}
-        ).select('-passwordHash');
-        if(!club) return res.status(404).json({message: 'Club not found'});
-        res.status(200).json({message: 'Club approved'});
-    }catch(err){
-        res.status(500).json({message: err.message});
-    }
-}
-
-const rejectClubRequest = async (req, res) => {
-    try{
-        const club = await club.findByIdAndUpdate(
-            req.param.id, {status: "rejected"}, {new: true}
-        ).select('-passwordHash');
-        if(!club) return res.status(404).json({message: 'Club not found'});
-        res.status(200).json({message: 'Club approved'});
-    }catch{
-        res.status(500).json({message: err.message});
-    }
-}
-
-const getAllClubs = async (req,res) => {
-    try{
-        const clubs = await Club.find().select('-passwordHash');
-        res.json(clubs);
-    }catch(error){
-        res.status(500).json({message: error.message});
-    }
-}
-
-const getApprovedClubs = async (req, res) => {
+const getPendingClubs = async (req, res) => {
   try {
-    const clubs = await Club.find({ status: 'approved' }).select('-passwordHash');
-    res.json(clubs);
+    const clubs = await service.getPendingClubs();
+    res.status(200).json(clubs);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-const getRejectedClubs = async (req, res) => {
+const approveClub = async (req, res) => {
   try {
-    const clubs = await Club.find({ status: 'rejected' }).select('-passwordHash');
-    res.json(clubs);
+    const result = await service.approveClub(req.params.id, req.user.id);
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const rejectClub = async (req, res) => {
+  try {
+    const result = await service.rejectClub(
+      req.params.id,
+      req.body.rejectionReason,
+      req.user.id
+    );
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const getPendingEvents = async (req, res) => {
+  try {
+    const events = await service.getPendingEvents();
+    res.status(200).json(events);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const approveEvent = async (req, res) => {
+  try {
+    const result = await service.approveEvent(req.params.id);
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const rejectEvent = async (req, res) => {
+  try {
+    const result = await service.rejectEvent(req.params.id, req.body.rejectionReason);
+    res.status(200).json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
 module.exports = {
-    pendingClubRequest,
-    approveClubRequest,
-    rejectClubRequest,
-    getAllClubs,
-    getApprovedClubs,
-    getRejectedClubs
-}
+  getPendingClubs,
+  approveClub,
+  rejectClub,
+  getPendingEvents,
+  approveEvent,
+  rejectEvent,
+};
