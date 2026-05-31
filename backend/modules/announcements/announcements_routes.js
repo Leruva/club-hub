@@ -6,8 +6,9 @@ const { requireAnnouncementOwnership } = require('../../middleware/event_middlew
 const router = express.Router();
 
 router.get('/', controller.getAllAnnouncements);
-router.post('/', verifyToken, requireRole('club'), controller.createAnnouncement);
-router.patch('/:id', verifyToken, requireRole('club'), requireAnnouncementOwnership, controller.updateAnnouncement);
-router.delete('/:id', verifyToken, requireRole('club'), requireAnnouncementOwnership, controller.deleteAnnouncement);
+router.get('/:id',controller.getAnnouncement);
+router.post('/', verifyToken, requireRole('president','vicePresident','coordinator'), controller.createAnnouncement);
+router.patch('/:id', verifyToken, requireRole('president','vicePresident','coordinator'), requireAnnouncementOwnership, controller.updateAnnouncement);
+router.delete('/:id', verifyToken, requireRole('president','vicePresident'), requireAnnouncementOwnership, controller.deleteAnnouncement);
 
 module.exports = router;
