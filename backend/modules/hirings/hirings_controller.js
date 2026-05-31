@@ -4,7 +4,8 @@ const createHiring = async (req, res) => {
   try {
     const hiring = await Hiring.create({
       ...req.body,
-      clubId: req.user.id,
+      club: req.user.clubId,
+      postedBy: req.user.id,
     });
     res.status(201).json(hiring);
   } catch (err) {
@@ -20,7 +21,7 @@ const getAllOpenHirings = async (req, res) => {
 const updateHiring = async (req, res) => {
   try {
     const updated = await Hiring.findOneAndUpdate(
-      { _id: req.params.id, clubId: req.user.id },
+      { _id: req.params.id, club: req.user.clubId },
       req.body,
       { new: true, runValidators: true }
     );
@@ -35,7 +36,7 @@ const deleteHiring = async (req, res) => {
   try {
     const deleted = await Hiring.findOneAndDelete({
       _id: req.params.id,
-      clubId: req.user.id,
+      club: req.user.clubId,
     });
     if (!deleted) return res.status(404).json({ message: 'Hiring not found' });
     res.json({ message: 'Hiring deleted successfully' });

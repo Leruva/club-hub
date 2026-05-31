@@ -18,6 +18,12 @@ const hiringSchema = new mongoose.Schema({
    postedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"
+   },
+
+   status: {
+      type: String,
+      enum: ['open', 'closed'],
+      default: 'open'
    }
 
 }, { timestamps: true });
