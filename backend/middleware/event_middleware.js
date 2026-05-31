@@ -49,8 +49,8 @@ const requireAnnouncementOwnership = async (req, res, next) => {
     if (!announcement) {
       return res.status(404).json({ message: 'Announcement not found' });
     }
-    if (announcement.clubId.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'You can only access your own announcements' });
+    if (announcement.club.toString() !== req.user.clubId) {
+      return res.status(403).json({ message: 'You can only access announcements of your club' });
     }
     req.announcement = announcement;
     next();

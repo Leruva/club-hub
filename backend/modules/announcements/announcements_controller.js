@@ -1,4 +1,4 @@
-const announcementModel = require("../../models/announcementModel")
+const Announcement = require("../../models/announcementModel")
 
 //create announcements
 const createAnnouncement = async (req, res) =>{
@@ -42,7 +42,7 @@ const deleteAnnouncement = async (req,res) =>{
 const getAllAnnouncements = async (req,res) =>{
     try{
         const announcements = await Announcement.find();
-        res.status(200).json(announcement);
+        res.status(200).json(announcements);
     }
     catch(err){
         res.status(500).json({message: err.message});
@@ -51,10 +51,11 @@ const getAllAnnouncements = async (req,res) =>{
 //get single announcement
 const getAnnouncement = async (req,res) =>{
     try{
-        const announcement = await Announcement.findByID(req.params.id);
+        const announcement = await Announcement.findById(req.params.id);
         if(!announcement) {
             return res.status(404).json({message: "Announcement not found"});
         }
+        res.status(200).json(announcement);
     }catch(err){
         res.status(500).json({message: err.message});
     }
