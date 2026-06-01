@@ -12,4 +12,7 @@ router.get('/:id/registrations', verifyToken, requireRole('president','vicePresi
 router.patch('/:id', verifyToken, requireRole('president','vicePresident'), checkEventOwnership, controller.updateEvent);
 router.delete('/:id', verifyToken, requireRole('president','vicePresident'), checkEventOwnership, controller.deleteEvent);
 
+router.post('/:id/feedback', verifyToken, requireRole('student'), controller.submitFeedback);
+router.get('/:id/feedback', verifyToken, requireRole('president','vicePresident','coordinator'), checkEventOwnership, controller.getEventFeedback);
+
 module.exports = router;

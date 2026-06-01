@@ -1,5 +1,6 @@
 const Event = require('../../models/eventModel');
 const Registration = require('../../models/registrationModel');
+const Feedback = require('../../models/feedbackModel');
 
 const createEvent = async (req,res) =>{
     try{
@@ -104,6 +105,49 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+const submitFeedback = async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    
+    const registration = await Registration.findOne({ eventId: req.params.id, studentId: req.user.id });
+    if (!registration) {
+      return res.status(403).json({ message: 'You must be registered for this event to leave feedback' });
+    }
+
+    const existing = await Feedback.findOne({ event: req.params.id, student: req.user.id });
+    if (existing) {
+      return res.status(400).json({ message: 'Feedback already submitted for this event' });
+    }
+
+    const feedback = await Feedback.create({
+      event: req.params.id,
+      student: req.user.id,
+      rating,
+      comment
+    });
+
+    res.status(201).json(feedback);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+const getEventFeedback = async (req, res) => {
+  try {
+    const feedbackList = await Feedback.find({ event: req.params.id }).populate('student', 'fullName email');
+    
+    let avgRating = 0;
+    if (feedbackList.length > 0) {
+      const sum = feedbackList.reduce((acc, curr) => acc + curr.rating, 0);
+      avgRating = (sum / feedbackList.length).toFixed(1);
+    }
+
+    res.json({ averageRating: Number(avgRating), totalReviews: feedbackList.length, feedback: feedbackList });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
     createEvent,
     updateEvent,
@@ -112,4 +156,6 @@ module.exports = {
     getSingleEvent,
     registerForEvent,
     getRegistrations,
+    submitFeedback,
+    getEventFeedback
 }
