@@ -203,11 +203,29 @@ const resetPassword = async (token, newPassword) => {
     return { message: 'Password updated successfully' };
 };
 
+const updatePassword = async (userId, oldPassword, newPassword) => {
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+        throw new Error('Incorrect old password');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    return { message: 'Password updated successfully' };
+};
+
 module.exports = {
     registerStudent,
     loginStudent,
     registerClub,
     loginClub,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    updatePassword
 };
