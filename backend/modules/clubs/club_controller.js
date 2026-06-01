@@ -2,6 +2,8 @@ const  Event  = require('../../models/eventModel');
 const  Registration  = require('../../models/registrationModel');
 const  Hiring  = require('../../models/hiringModel');
 const  Announcement  = require('../../models/announcementModel');
+const  User  = require('../../models/userModel');
+const  ClubMember  = require('../../models/clubMemberModel');
 
 const getMyInsights = async (req, res) => {
   try {
@@ -51,4 +53,42 @@ const getMyInsights = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-module.exports = { getMyInsights };
+
+const addMember = async (req, res) => {
+  try {
+    const { email, role } = req.body;
+    const clubId = req.user.clubId;
+
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const existingMember = await ClubMember.findOne({ user: user._id, club: clubId });
+    if (existingMember) {
+      return res.status(400).json({ message: 'User is already a member of this club' });
+    }
+
+    const member = await ClubMember.create({
+      user: user._id,
+      club: clubId,
+      role: role || 'member'
+    });
+
+    res.status(201).json({ message: 'Member added successfully', member });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const getMembers = async (req, res) => {
+  try {
+    const clubId = req.user.clubId;
+    const members = await ClubMember.find({ club: clubId }).populate('user', 'fullName email course year');
+    res.json(members);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = { getMyInsights, addMember, getMembers }; 

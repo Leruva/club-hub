@@ -11,6 +11,11 @@ const hiringSchema = new mongoose.Schema({
 
    description: String,
 
+   applicationLink: {
+      type: String,
+      required: true
+   },
+
    requirements: [String],
 
    deadline: Date,
