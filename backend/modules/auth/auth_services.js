@@ -4,6 +4,9 @@ const ClubMember = require('../../models/clubMemberModel');
 
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../../utils/jwt');
+const crypto = require('crypto');
+const PasswordResetToken = require('../../models/passwordResetTokenModel');
+const sendEmail = require('../../utils/sendEmail');
 
 
 const registerStudent = async (data) =>{
@@ -143,9 +146,68 @@ const loginClub = async ({ email, password }) => {
 };
 
 
+const forgotPassword = async (email) => {
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new Error('There is no user with that email address.');
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    await PasswordResetToken.deleteMany({ userId: user._id }); 
+    await PasswordResetToken.create({
+        userId: user._id,
+        token: hashedToken,
+        expiresAt: Date.now() + 60 * 60 * 1000 
+    });
+
+    const resetURL = `http://localhost:5173/reset-password?token=${resetToken}`;
+    const message = `Forgot your password? Submit your new password here: \n${resetURL}\nIf you didn't forget your password, please ignore this email!`;
+
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: 'Your password reset token (valid for 1 hour)',
+            message
+        });
+        return { message: 'Token sent to email!' };
+    } catch (err) {
+        await PasswordResetToken.deleteMany({ userId: user._id });
+        throw new Error('There was an error sending the email. Try again later!');
+    }
+};
+
+const resetPassword = async (token, newPassword) => {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const resetRecord = await PasswordResetToken.findOne({
+        token: hashedToken,
+        expiresAt: { $gt: Date.now() }
+    });
+
+    if (!resetRecord) {
+        throw new Error('Token is invalid or has expired');
+    }
+
+    const user = await User.findById(resetRecord.userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    await PasswordResetToken.findByIdAndDelete(resetRecord._id);
+
+    return { message: 'Password updated successfully' };
+};
+
 module.exports = {
     registerStudent,
     loginStudent,
     registerClub,
-    loginClub
+    loginClub,
+    forgotPassword,
+    resetPassword
 };
