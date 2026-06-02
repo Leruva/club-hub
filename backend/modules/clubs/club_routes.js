@@ -4,8 +4,8 @@ const { verifyToken, requireRole } = require('../../middleware/auth_middleware')
 
 const router = express.Router();
 
-router.get('/me/insights', verifyToken, requireRole('club'), controller.getMyInsights);
-router.post('/me/members', verifyToken, requireRole('club'), controller.addMember);
-router.get('/me/members', verifyToken, requireRole('club'), controller.getMembers);
+router.get('/me/insights', verifyToken, requireRole('president', 'vicePresident', 'coordinator'), controller.getMyInsights);
+router.post('/me/members', verifyToken, requireRole('president', 'vicePresident', 'coordinator'), controller.addMember);
+router.get('/me/members', verifyToken, requireRole('president', 'vicePresident', 'coordinator'), controller.getMembers);
 
 module.exports = router;
